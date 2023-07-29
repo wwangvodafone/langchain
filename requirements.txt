@@ -4,5 +4,4 @@ streamlit==1.25.0
 PyPDF2
 qdrant_client
 tiktoken
-constants
 nltk
