@@ -24,14 +24,6 @@ COLLECTION_NAME = "my_collection_2"
 
 
 def select_model():
-    st.sidebar.title("Options")
-    model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
-    clear_button = st.sidebar.button("Clear Conversation", key="clear")
-    temperature = st.sidebar.slider("Temperature:", min_value=0.0, max_value=2.0, value=0.0,step=0.1)
-    st.sidebar.markdown("## Costs")
-    st.sidebar.markdown("**Total cost**")
-    for i in range(3):
-        st.sidebar.markdown(f"- ${i+0.01}")
     if model == "GPT-3.5":
         model_name = "gpt-3.5-turbo-0613"
     else:
