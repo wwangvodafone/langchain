@@ -11,6 +11,8 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.llms import OpenAI
 import nltk
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 
 QDRANT_PATH = "./data"
 COLLECTION_NAME = "my_collection_2"
