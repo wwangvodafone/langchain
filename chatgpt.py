@@ -3,7 +3,12 @@ import streamlit as st
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
-
+from langchain.schema import (
+    SystemMessage,
+    HumanMessage,
+    AIMessage
+)
+from langchain.callbacks import get_openai_callback
 from PyPDF2 import PdfReader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
