@@ -83,17 +83,14 @@ def main():
     if user_input := st.chat_input("Please enter your question:"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("ChatGPT is typing ..."):
-            response = llm(st.session_state.messages)
+            chain = ConversationalRetrievalChain.from_llm(
+                llm,
+                retriever=index.vectorstore.as_retriever(search_kwargs={"k": 1}),
+            )
+            chat_history = []
+            response = chain({"question": user_input, "chat_history": chat_history})
         st.session_state.messages.append(AIMessage(content=response.content))
-    chain = ConversationalRetrievalChain.from_llm(
-            llm,
-            retriever=index.vectorstore.as_retriever(search_kwargs={"k": 1}),
-      )
 
-    chat_history = []
-    result = chain({"question": user_input, "chat_history": chat_history})
-    st.write(result['answer'])
-    '''
     # チャット履歴の表示
     messages = st.session_state.get('messages', [])
     for message in messages:
@@ -105,6 +102,6 @@ def main():
                 st.markdown(message.content)
         else:  # isinstance(message, SystemMessage):
             st.write(f"System message: {message.content}")
-   '''
+
 if __name__ == '__main__':
     main()
