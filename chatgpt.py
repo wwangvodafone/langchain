@@ -21,7 +21,7 @@ from qdrant_client.models import Distance, VectorParams
 
 QDRANT_PATH = "./data"
 COLLECTION_NAME = "my_collection_2"
-
+selection = False
 
 
 def select_model():
@@ -152,7 +152,6 @@ def init_page():
     for i in range(3):
         st.sidebar.markdown(f"- ${i+0.01}")
 def main():
-    selection = False
     st.set_page_config(
         page_title="My Great ChatGPT",
         page_icon="🤗"
