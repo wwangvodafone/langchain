@@ -139,7 +139,6 @@ def init_page():
     st.session_state.costs = []
     model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
-    clear_button = st.sidebar.button("Clear Conversation", key="clear")
     if clear_button or "messages" not in st.session_state:
         st.session_state.messages = [
             SystemMessage(content="You are a helpful assistant.")
