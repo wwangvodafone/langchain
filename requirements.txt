@@ -5,3 +5,4 @@ PyPDF2
 qdrant_client
 tiktoken
 nltk
+unstructured
