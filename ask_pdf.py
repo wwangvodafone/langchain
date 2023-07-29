@@ -105,7 +105,7 @@ def build_qa_model(llm):
         # "mmr",  "similarity_score_threshold" などもある
         search_type="similarity",
         # 文書を何個取得するか (default: 4)
-        search_kwargs={"k":10}
+        search_kwargs={"k":4}
     )
     return RetrievalQA.from_chain_type(
         llm=llm,
