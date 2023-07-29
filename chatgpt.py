@@ -12,7 +12,6 @@ from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
 import constants
-import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
 import nltk
