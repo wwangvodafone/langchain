@@ -12,9 +12,8 @@ from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
 import constants
-
-ssl._create_default_https_context = ssl._create_unverified_context
 import nltk
+
 nltk.download('averaged_perceptron_tagger')
 os.environ["OPENAI_API_KEY"] = constants.APIKEY
 
