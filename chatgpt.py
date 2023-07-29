@@ -24,6 +24,7 @@ COLLECTION_NAME = "my_collection_2"
 
 
 def select_model():
+    model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
     if model == "GPT-3.5":
         model_name = "gpt-3.5-turbo-0613"
     else:
@@ -134,7 +135,6 @@ def init_messages():
 def init_page():
     st.sidebar.title("Options")
     st.session_state.costs = []
-    model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
     if clear_button or "messages" not in st.session_state:
         st.session_state.messages = [
