@@ -1,16 +1,15 @@
+from glob import glob
 import streamlit as st
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
-import os
-import sys
-import openai
-from langchain.chains import ConversationalRetrievalChain, RetrievalQA
-from langchain.document_loaders import DirectoryLoader, TextLoader
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.indexes import VectorstoreIndexCreator
-from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.llms import OpenAI
-import nltk
+from langchain.callbacks import get_openai_callback
+
+from PyPDF2 import PdfReader
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Qdrant
+from langchain.chains import RetrievalQA
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
