@@ -34,11 +34,8 @@ def select_model():
 
     return ChatOpenAI(temperature=temperature, model_name=model_name)
 def get_pdf_text():
-    uploaded_file = st.file_uploader(
-        label='Upload your PDF here😇',
-        type='pdf'
-    )
-    if uploaded_file:
+    pdf_files = [file for file in os.listdir(QDRANT_PATH) if file.endswith('.pdf')]
+    for pdf_file in pdf_files:
         pdf_reader = PdfReader(uploaded_file)
         text = '\n\n'.join([page.extract_text() for page in pdf_reader.pages])
         text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
@@ -49,9 +46,8 @@ def get_pdf_text():
             chunk_size=500,
             chunk_overlap=0,
         )
-        return text_splitter.split_text(text)
-    else:
-        return None
+    return text_splitter.split_text(text)
+
 def load_qdrant():
     client = QdrantClient(path=QDRANT_PATH)
 
@@ -79,7 +75,7 @@ def build_qa_model(llm):
         # "mmr",  "similarity_score_threshold" などもある
         search_type="similarity",
         # 文書を何個取得するか (default: 4)
-        search_kwargs={"k":10}
+        search_kwargs={"k":4}
     )
     return RetrievalQA.from_chain_type(
         llm=llm,
@@ -89,6 +85,13 @@ def build_qa_model(llm):
         verbose=True
     )
     
+def page_pdf_read_and_build_vector_db():
+    container = st.container()
+    with container:
+        pdf_text = get_pdf_text()
+        if pdf_text:
+            with st.spinner("Loading PDF ..."):
+                build_vector_store(pdf_text)    
 def ask(qa, query):
     with get_openai_callback() as cb:
         # query / result / source_documents
@@ -153,6 +156,7 @@ def main():
     )
     st.header("My Great ChatGPT 🤗")
     init_page()
+    page_pdf_read_and_build_vector_db()
     page_ask_my_pdf()
     costs = st.session_state.get('costs', [])
     st.sidebar.markdown("## Costs")
