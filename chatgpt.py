@@ -10,16 +10,11 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.llms import OpenAI
-import constants
 import nltk
 
-nltk.download('averaged_perceptron_tagger')
-os.environ["OPENAI_API_KEY"] = constants.APIKEY
+QDRANT_PATH = "./data"
+COLLECTION_NAME = "my_collection_2"
 
-# Enable to save to disk & reuse the model (for repeated queries on the same data)
-PERSIST = False
-
-query = None
 
 
 def select_model():
@@ -39,7 +34,97 @@ def select_model():
     temperature = st.sidebar.slider("Temperature:", min_value=0.0, max_value=2.0, value=0.0, step=0.01)
 
     return ChatOpenAI(temperature=temperature, model_name=model_name)
+def get_pdf_text():
+    uploaded_file = st.file_uploader(
+        label='Upload your PDF here😇',
+        type='pdf'
+    )
+    if uploaded_file:
+        pdf_reader = PdfReader(uploaded_file)
+        text = '\n\n'.join([page.extract_text() for page in pdf_reader.pages])
+        text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+            model_name="text-embedding-ada-002",
+            # 適切な chunk size は質問対象のPDFによって変わるため調整が必要
+            # 大きくしすぎると質問回答時に色々な箇所の情報を参照することができない
+            # 逆に小さすぎると一つのchunkに十分なサイズの文脈が入らない
+            chunk_size=500,
+            chunk_overlap=0,
+        )
+        return text_splitter.split_text(text)
+    else:
+        return None
+def load_qdrant():
+    client = QdrantClient(path=QDRANT_PATH)
 
+    # すべてのコレクション名を取得
+    collections = client.get_collections().collections
+    collection_names = [collection.name for collection in collections]
+
+    # コレクションが存在しなければ作成
+    if COLLECTION_NAME not in collection_names:
+        # コレクションが存在しない場合、新しく作成します
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+        )
+        print('collection created')
+
+    return Qdrant(
+        client=client,
+        collection_name=COLLECTION_NAME, 
+        embeddings=OpenAIEmbeddings()
+    )
+def build_qa_model(llm):
+    qdrant = load_qdrant()
+    retriever = qdrant.as_retriever(
+        # "mmr",  "similarity_score_threshold" などもある
+        search_type="similarity",
+        # 文書を何個取得するか (default: 4)
+        search_kwargs={"k":10}
+    )
+    return RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff", 
+        retriever=retriever,
+        return_source_documents=True,
+        verbose=True
+    )
+    
+def ask(qa, query):
+    with get_openai_callback() as cb:
+        # query / result / source_documents
+        answer = qa(query)
+
+    return answer, cb.total_cost    
+    
+def page_ask_my_pdf():
+    st.title("Ask My PDF(s)")
+
+    llm = select_model()
+    container = st.container()
+    response_container = st.container()
+
+    with container:
+        query = st.text_input("Query: ", key="input")
+        if not query:
+            answer = None
+        else:
+            qa = build_qa_model(llm)
+            if qa:
+                with st.spinner("ChatGPT is typing ..."):
+                    answer, cost = ask(qa, query)
+                st.session_state.costs.append(cost)
+            else:
+                answer = None
+
+        if answer:
+            with response_container:
+                st.markdown("## Answer")
+                st.write(answer)
+def build_vector_store(pdf_text):
+    qdrant = load_qdrant()
+    qdrant.add_texts(pdf_text)
+    
 def init_messages():
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
     if clear_button or "messages" not in st.session_state:
@@ -70,37 +155,12 @@ def main():
     )
     st.header("My Great ChatGPT 🤗")
 
-    llm = select_model()
-    # チャット履歴の初期化
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            SystemMessage(content="You are a helpful assistant.")
-        ]
-    loader = DirectoryLoader("data/")
-    index = VectorstoreIndexCreator().from_loaders([loader])
-    # ユーザーの入力を監視
-    if user_input := st.chat_input("Please enter your question:"):
-        st.session_state.messages.append(HumanMessage(content=user_input))
-        with st.spinner("ChatGPT is typing ..."):
-            chain = ConversationalRetrievalChain.from_llm(
-                llm,
-                retriever=index.vectorstore.as_retriever(search_kwargs={"k": 1}),
-            )
-            chat_history = []
-            response = chain({"question": user_input, "chat_history": chat_history})
-        st.session_state.messages.append(AIMessage(content=response.content))
-
-    # チャット履歴の表示
-    messages = st.session_state.get('messages', [])
-    for message in messages:
-        if isinstance(message, AIMessage):
-            with st.chat_message('assistant'):
-                st.markdown(message.content)
-        elif isinstance(message, HumanMessage):
-            with st.chat_message('user'):
-                st.markdown(message.content)
-        else:  # isinstance(message, SystemMessage):
-            st.write(f"System message: {message.content}")
-
+    page_ask_my_pdf()
+    costs = st.session_state.get('costs', [])
+    st.sidebar.markdown("## Costs")
+    st.sidebar.markdown(f"**Total cost: ${sum(costs):.5f}**")
+    for cost in costs:
+        st.sidebar.markdown(f"- ${cost:.5f}")
+        
 if __name__ == '__main__':
     main()
