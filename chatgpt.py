@@ -37,7 +37,7 @@ def select_model():
 def get_pdf_text():
     pdf_files = [file for file in os.listdir(QDRANT_PATH) if file.endswith('.pdf')]
     for pdf_file in pdf_files:
-        pdf_reader = PdfReader(uploaded_file)
+        pdf_reader = PdfReader(pdf_file)
         text = '\n\n'.join([page.extract_text() for page in pdf_reader.pages])
         text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
             model_name="text-embedding-ada-002",
