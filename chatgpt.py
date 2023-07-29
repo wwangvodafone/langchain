@@ -155,13 +155,12 @@ def init_page():
     for i in range(3):
         st.sidebar.markdown(f"- ${i+0.01}")
 def main():
-    init_page()
     st.set_page_config(
         page_title="My Great ChatGPT",
         page_icon="🤗"
     )
     st.header("My Great ChatGPT 🤗")
-
+    init_page()
     page_ask_my_pdf()
     costs = st.session_state.get('costs', [])
     st.sidebar.markdown("## Costs")
