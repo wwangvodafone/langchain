@@ -6,4 +6,5 @@ qdrant_client
 tiktoken
 nltk
 unstructured
+pysqlite3-binary
 chromadb
