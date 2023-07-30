@@ -21,8 +21,6 @@ from qdrant_client.models import Distance, VectorParams
 
 QDRANT_PATH = "./data"
 COLLECTION_NAME = "my_collection_2"
-selection = False
-
 
 def select_model():
     model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
@@ -158,10 +156,12 @@ def main():
     )
     st.header("My Great ChatGPT 🤗")
     init_page()
-    if selection == False:
+    selection = st.sidebar.radio("Go to", ["PDF Reading", "Ask My PDF(s)"])
+    if selection == "PDF Reading":
         page_pdf_read_and_build_vector_db()
         selection = True
-    page_ask_my_pdf()
+    else:
+        page_ask_my_pdf()
     costs = st.session_state.get('costs', [])
     st.sidebar.markdown("## Costs")
     st.sidebar.markdown(f"**Total cost: ${sum(costs):.5f}**")
