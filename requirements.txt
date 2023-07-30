@@ -9,3 +9,4 @@ nltk
 unstructured
 pysqlite3-binary
 chromadb
+pycryptodome==3.15.0
