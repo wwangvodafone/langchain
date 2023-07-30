@@ -48,9 +48,7 @@ def get_pdf_text():
         )
     return text_splitter.split_text(text)
 
-def load_qdrant():
-    client = QdrantClient(path=QDRANT_PATH)
-
+def load_qdrant(client):
     # すべてのコレクション名を取得
     collections = client.get_collections().collections
     collection_names = [collection.name for collection in collections]
@@ -85,13 +83,13 @@ def build_qa_model(llm):
         verbose=True
     )
     
-def page_pdf_read_and_build_vector_db():
+def page_pdf_read_and_build_vector_db(client):
     container = st.container()
     with container:
         pdf_text = get_pdf_text()
         if pdf_text:
             with st.spinner("Loading PDF ..."):
-                build_vector_store(pdf_text)    
+                build_vector_store(pdf_text, client)    
 def ask(qa, query):
     with get_openai_callback() as cb:
         # query / result / source_documents
@@ -123,8 +121,8 @@ def page_ask_my_pdf():
             with response_container:
                 st.markdown("## Answer")
                 st.write(answer)
-def build_vector_store(pdf_text):
-    qdrant = load_qdrant()
+def build_vector_store(pdf_text, client):
+    qdrant = load_qdrant(client)
     qdrant.add_texts(pdf_text)
     
 def init_messages():
@@ -144,17 +142,19 @@ def init_page():
             SystemMessage(content="You are a helpful assistant.")
         ]
         st.session_state.costs = []
-
+    client = QdrantClient(path=QDRANT_PATH)
+    return client
+    
 def main():
     st.set_page_config(
         page_title="My Great ChatGPT",
         page_icon="🤗"
     )
     st.header("My Great ChatGPT 🤗")
-    init_page()
+    client = init_page()
     selection = st.sidebar.radio("Go to", ["PDF Reading", "Ask My PDF(s)"])
     if selection == "PDF Reading":
-        page_pdf_read_and_build_vector_db()
+        page_pdf_read_and_build_vector_db(client)
         selection = True
     else:
         page_ask_my_pdf()
