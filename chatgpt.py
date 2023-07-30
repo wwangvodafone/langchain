@@ -122,8 +122,8 @@ def page_ask_my_pdf():
             with response_container:
                 st.markdown("## Answer")
                 st.write(answer)
-def build_vector_store(pdf_text, client):
-    qdrant = load_qdrant(client)
+def build_vector_store(pdf_text):
+    qdrant = load_qdrant()
     qdrant.add_texts(pdf_text)
     
 def init_messages():
