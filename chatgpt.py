@@ -144,11 +144,7 @@ def init_page():
             SystemMessage(content="You are a helpful assistant.")
         ]
         st.session_state.costs = []
-    temperature = st.sidebar.slider("Temperature:", min_value=0.0, max_value=2.0, value=0.0,step=0.1)
-    st.sidebar.markdown("## Costs")
-    st.sidebar.markdown("**Total cost**")
-    for i in range(3):
-        st.sidebar.markdown(f"- ${i+0.01}")
+
 def main():
     st.set_page_config(
         page_title="My Great ChatGPT",
