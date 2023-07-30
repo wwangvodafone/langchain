@@ -121,7 +121,7 @@ def page_ask_my_pdf():
         if answer:
             with response_container:
                 st.markdown("## Answer")
-                st.write(answer.result)
+                st.write(answer["result"])
 def build_vector_store(pdf_text):
     qdrant = load_qdrant()
     qdrant.add_texts(pdf_text)
