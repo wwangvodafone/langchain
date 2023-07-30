@@ -48,7 +48,8 @@ def get_pdf_text():
         )
     return text_splitter.split_text(text)
 
-def load_qdrant(client):
+def load_qdrant():
+    client = QdrantClient(path=QDRANT_PATH)
     # すべてのコレクション名を取得
     collections = client.get_collections().collections
     collection_names = [collection.name for collection in collections]
@@ -83,7 +84,7 @@ def build_qa_model(llm):
         verbose=True
     )
     
-def page_pdf_read_and_build_vector_db(client):
+def page_pdf_read_and_build_vector_db():
     container = st.container()
     with container:
         pdf_text = get_pdf_text()
@@ -152,8 +153,7 @@ def main():
     init_page()
     selection = st.sidebar.radio("Go to", ["PDF Reading", "Ask My PDF(s)"])
     if selection == "PDF Reading":
-        client = QdrantClient(path=QDRANT_PATH)
-        page_pdf_read_and_build_vector_db(client)
+        page_pdf_read_and_build_vector_db()
         selection = True
     else:
         page_ask_my_pdf()
