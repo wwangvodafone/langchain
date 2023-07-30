@@ -83,7 +83,8 @@ def build_qa_model(llm):
         verbose=True
     )
     
-def page_pdf_read_and_build_vector_db(client):
+def page_pdf_read_and_build_vector_db():
+    client = QdrantClient(path=QDRANT_PATH)
     container = st.container()
     with container:
         pdf_text = get_pdf_text()
@@ -142,8 +143,6 @@ def init_page():
             SystemMessage(content="You are a helpful assistant.")
         ]
         st.session_state.costs = []
-    client = QdrantClient(path=QDRANT_PATH)
-    return client
     
 def main():
     st.set_page_config(
@@ -151,10 +150,10 @@ def main():
         page_icon="🤗"
     )
     st.header("My Great ChatGPT 🤗")
-    client = init_page()
+    init_page()
     selection = st.sidebar.radio("Go to", ["PDF Reading", "Ask My PDF(s)"])
     if selection == "PDF Reading":
-        page_pdf_read_and_build_vector_db(client)
+        page_pdf_read_and_build_vector_db()
         selection = True
     else:
         page_ask_my_pdf()
