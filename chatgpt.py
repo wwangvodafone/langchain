@@ -90,7 +90,7 @@ def page_pdf_read_and_build_vector_db():
         pdf_text = get_pdf_text()
         if pdf_text:
             with st.spinner("Loading PDF ..."):
-                build_vector_store(pdf_text, client)    
+                build_vector_store(pdf_text)    
 def ask(qa, query):
     with get_openai_callback() as cb:
         # query / result / source_documents
