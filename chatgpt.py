@@ -83,8 +83,7 @@ def build_qa_model(llm):
         verbose=True
     )
     
-def page_pdf_read_and_build_vector_db():
-    client = QdrantClient(path=QDRANT_PATH)
+def page_pdf_read_and_build_vector_db(client):
     container = st.container()
     with container:
         pdf_text = get_pdf_text()
@@ -153,7 +152,8 @@ def main():
     init_page()
     selection = st.sidebar.radio("Go to", ["PDF Reading", "Ask My PDF(s)"])
     if selection == "PDF Reading":
-        page_pdf_read_and_build_vector_db()
+        client = QdrantClient(path=QDRANT_PATH)
+        page_pdf_read_and_build_vector_db(client)
         selection = True
     else:
         page_ask_my_pdf()
