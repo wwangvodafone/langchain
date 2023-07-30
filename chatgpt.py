@@ -96,7 +96,7 @@ def ask(qa, query):
         # query / result / source_documents
         answer = qa(query)
 
-    return answer.result, cb.total_cost    
+    return answer, cb.total_cost    
     
 def page_ask_my_pdf():
     st.title("Ask My PDF(s)")
